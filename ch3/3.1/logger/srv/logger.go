@@ -1,4 +1,4 @@
-package main
+package logger
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/amupxm/golang-backend-training/c3/3.1/logger/arg"
 )
 
 type (
@@ -14,7 +16,7 @@ type (
 		started          bool
 		ended            bool
 		time             *time.Time
-		logLevel         logLevel
+		LogLevel         LogLevel
 		verbose          bool
 		file             bool
 		std              bool
@@ -23,14 +25,19 @@ type (
 		broadCastChannel chan interface{}
 		duration         *time.Duration
 		prefixString     string
+		stdout           io.Writer
 	}
 
 	Logger interface {
-		// Start the logger operation
-		doLog(level logLevel, a ...interface{})
-
+		// use for add custom output
+		SetCustomOut(outPutt io.Writer)
+		// doLog send log to stdout or file
+		doLog(level LogLevel, a ...interface{})
+		// End send finished signal to log
 		End()
+		// Prefix the log with a string
 		Prefix(format ...string) *logger
+		// GetCaller return the caller of the log
 		GetCaller() *logger
 
 		// Log logs a message at log level
@@ -86,55 +93,81 @@ type (
 		logger *logger
 	}
 	LogResult interface {
+		// TraceStack trace the stack of the log caller
 		TraceStack()
 	}
-	logLevel      int
+	LogLevel      int
 	LoggerOptions struct {
-		LogLevel    logLevel
+		LogLevel    LogLevel
 		Verbose     bool
 		File        bool
 		FilePath    string
 		Std         bool
 		UseCollores bool
-		Writer      io.Writer
+		Stdout      io.Writer
 	}
 )
 
 const (
-	Nothing logLevel = iota
-	Alert
-	Error
-	Warn
-	Highlight
-	Inform
-	Log
-	Trace
+	Nothing   LogLevel = iota //0
+	Alert                     //1
+	Error                     //2
+	Warn                      //3
+	Highlight                 //4
+	Inform                    //5
+	Log                       //6
+	Trace                     //7
 )
 
 func CreateLogger(LoggerOpts *LoggerOptions) Logger {
+	guideMapOfLevels := []LogLevel{
+		Alert,
+		Error,
+		Warn,
+		Highlight,
+		Inform,
+		Log,
+		Trace,
+	}
 	c := make(chan interface{})
+
 	if LoggerOpts.LogLevel > Trace {
 		LoggerOpts.LogLevel = Trace
 	}
+
 	// Cuz alert and error are in 1 level
-	if LoggerOpts.LogLevel == Alert {
-		LoggerOpts.LogLevel = Error
+	if LoggerOpts.LogLevel >= Alert {
+		LoggerOpts.LogLevel += 1
+	}
+	if LoggerOpts.Stdout == nil {
+		LoggerOpts.Stdout = os.Stdout
+	}
+	v := arg.FlagConfig.Levels[0] || LoggerOpts.Verbose
+	if arg.FlagConfig.MinLvl > int(LoggerOpts.LogLevel) {
+		LoggerOpts.LogLevel = guideMapOfLevels[arg.FlagConfig.MinLvl]
 	}
 	l := &logger{
-		logLevel:         LoggerOpts.LogLevel,
-		verbose:          LoggerOpts.Verbose,
+		LogLevel:         LoggerOpts.LogLevel,
+		verbose:          v,
 		file:             LoggerOpts.File,
 		filePath:         LoggerOpts.FilePath,
 		std:              LoggerOpts.Std,
 		useCollores:      LoggerOpts.UseCollores,
 		broadCastChannel: c,
+		stdout:           LoggerOpts.Stdout,
 	}
 	l.started = true
 	t := time.Now()
 	l.time = &t
 	go l.wStd(l.broadCastChannel)
-	l.broadCastChannel <- "BEGIN :" + "\n"
+	if l.verbose {
+		l.doLog(Alert, "BEGIN :"+"\n")
+	}
 	return l
+}
+
+func (l *logger) SetCustomOut(outPutt io.Writer) {
+	l.stdout = outPutt
 }
 
 func (l *logger) Prefix(format ...string) *logger {
@@ -148,8 +181,16 @@ func (l *logger) End() {
 		*l.time,
 	)
 	l.duration = &d
-	l.broadCastChannel <- "\nEND : " + l.duration.String() + "\n"
+	if l.verbose {
+		l.doLog(Alert, "\nEND : "+l.duration.String()+"\n")
+	}
 	l.broadCastChannel <- nil // to gratefull close the channel
+}
+
+func (lr *logResult) TraceStack() {
+	stackSlice := make([]byte, 512)
+	s := runtime.Stack(stackSlice, false)
+	lr.logger.LogF("\n%s", stackSlice[0:s])
 }
 
 func (l *logger) getCaller() string {
@@ -162,8 +203,19 @@ func (l *logger) getCaller() string {
 	caller := runtime.FuncForPC(fpcs[0] - 2)
 	return caller.Name() + "()"
 }
+func (l *logger) GetCaller() *logger {
+	l.LogF("%s :: ", l.getCaller())
+	return l
+}
 
-func (l *logger) doLog(level logLevel, a ...interface{}) {
+func (l *logger) doLog(level LogLevel, a ...interface{}) {
+
+	// Check log level permission :
+	// permission Nothing is not allowed to log
+	if l.LogLevel <= Nothing || level > l.LogLevel {
+		return
+	}
+	// to write to file
 	if l.prefixString != "" {
 		l.broadCastChannel <- l.prefixString + ": "
 	}
@@ -172,23 +224,12 @@ func (l *logger) doLog(level logLevel, a ...interface{}) {
 	}
 }
 
-func (lr *logResult) TraceStack() {
-	stackSlice := make([]byte, 512)
-	s := runtime.Stack(stackSlice, false)
-	lr.logger.LogF("\n%s", stackSlice[0:s])
-}
-
-func (l *logger) GetCaller() *logger {
-	l.LogF("%s :: ", l.getCaller())
-	return l
-}
-
 func (l *logger) wStd(c chan interface{}) {
 	if l.std {
 		for msg := range c {
 			if msg != nil {
 				fmt.Fprint(
-					os.Stdout,
+					l.stdout,
 					msg,
 				)
 			} else {
