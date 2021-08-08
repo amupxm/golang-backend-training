@@ -94,6 +94,13 @@ func TestParseCAD(t *testing.T) {
 				56,
 			},
 		},
+		{
+			"$.000123456",
+			money.CAD{
+				0,
+				0,
+			},
+		},
 	}
 	for _, test := range testTable {
 		if got, err := money.ParseCAD(test.S); *got != test.Result || err != nil {
@@ -164,7 +171,7 @@ func TestMultiply(t *testing.T) {
 	}
 	for _, test := range testTable {
 		if got := test.A.Mul(test.B); got != test.Result {
-			t.Errorf("Add(%v, %v) = %v; want %v", test.A, test.B, got, test.Result)
+			t.Errorf("Sub(%v, %v) = %v; want %v", test.A, test.B, got, test.Result)
 		}
 	}
 }
@@ -193,7 +200,7 @@ func TestSub(t *testing.T) {
 	}
 	for _, test := range testTable {
 		if got := test.A.Sub(test.B); got != test.Result {
-			t.Errorf("Add(%v, %v) = %v; want %v", test.A, test.B, got, test.Result)
+			t.Errorf("Sub(%v, %v) = %v; want %v", test.A, test.B, got, test.Result)
 		}
 	}
 }
