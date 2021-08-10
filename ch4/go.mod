@@ -1,4 +1,4 @@
-module github.com/amupxm/golang-backend-training/c3
+module github.com/amupxm/golang-backend-training/c4
 
 go 1.16
 

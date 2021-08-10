@@ -1,15 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
-	logger "github.com/amupxm/xmus-logger/srv"
+	logger "github.com/amupxm/xmus-logger"
 )
 
 func main() {
 	log := logger.CreateLogger(
 		&logger.LoggerOptions{
-			LogLevel: 5,
+			LogLevel: 6,
 			Std:      true,
 			Verbose:  false,
 		},
@@ -29,9 +30,9 @@ func main() {
 			w.Write([]byte("Name is required"))
 			return
 		}
-		log.Informln("Hello " + params.Get("name"))
+		log.Informln(fmt.Sprintf("Hello %s", params.Get("name")))
 
-		w.Write([]byte("Hello " + params.Get("name")))
+		w.Write([]byte(fmt.Sprintf("Hello %s", params.Get("name"))))
 		return
 	})
 	http.ListenAndServe(":8080", httpHandler)

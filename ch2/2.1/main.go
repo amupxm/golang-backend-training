@@ -10,13 +10,13 @@ func main() {
 	flag.StringVar(
 		&fi,
 		"name",
-		"EMPTY_NAME",
+		"",
 		"name of user to greeting",
 	)
 	flag.Parse()
-	if fi == "EMPTY_NAME" {
-		fmt.Println("please use --name flag like :\n go run main.go --name=YourNameHere")
+	if fi == "" {
+		fmt.Println("please use --name=YourNameHere")
 		return
 	}
-	fmt.Println("Hello " + fi + "!")
+	fmt.Printf("Hello %s !", fi)
 }

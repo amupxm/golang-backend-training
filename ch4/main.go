@@ -1,7 +1,7 @@
 package main
 
 import (
-	arg "github.com/amupxm/golang-backend-training/c3/args"
+	arg "github.com/amupxm/golang-backend-training/c4/args"
 	logger "github.com/amupxm/xmus-logger"
 )
 

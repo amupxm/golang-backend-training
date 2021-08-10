@@ -1,20 +1,15 @@
 package main
 
 import (
-	"fmt"
-
-	config "github.com/amupxm/golang-backend-training/c1/1.8/cfg"
-	helper "github.com/amupxm/golang-backend-training/c1/1.8/lib/formLetter"
+	config "github.com/amupxm/golang-backend-training/chapter1/section1.9/cfg"
+	helper "github.com/amupxm/golang-backend-training/chapter1/section1.9/lib/formLetter"
 )
 
 func main() {
-
-	helper.PrintIt(
-		fmt.Sprintf(
-			config.TheLetter,
-			config.Name,
-			config.Weather,
-			config.Snack,
-		),
+	helper.NewFormLetter().Print(
+		config.TheLetter,
+		config.Name,
+		config.Weather,
+		config.Snack,
 	)
 }

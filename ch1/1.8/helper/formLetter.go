@@ -2,11 +2,19 @@ package helper
 
 import (
 	"fmt"
-	"strings"
 )
 
-func PrintIt(args ...string) {
-	fmt.Println(
-		strings.Join(args, "\n"),
-	)
+type (
+	FormLetter interface {
+		Print(Letter, Name, Weather, snackName string)
+	}
+	formLetter struct{}
+)
+
+func NewFormLetter() FormLetter {
+	return &formLetter{}
+}
+
+func (f *formLetter) Print(Letter, Name, Weather, snackName string) {
+	fmt.Printf(Letter, Name, Weather, snackName)
 }
