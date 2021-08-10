@@ -7,7 +7,7 @@ import (
 )
 
 func (c *CAD) Value() (driver.Value, error) {
-	return c.AsCent, nil
+	return fmt.Sprintf("%d.%d", c.Dollar, c.Cents), nil
 }
 
 func (c *CAD) Scan(src interface{}) error {
@@ -15,6 +15,8 @@ func (c *CAD) Scan(src interface{}) error {
 	switch src := src.(type) {
 	case []byte:
 		str = string(src[0])
+	case string:
+		str = src
 	case int64:
 		str = fmt.Sprint(src)
 	default:
