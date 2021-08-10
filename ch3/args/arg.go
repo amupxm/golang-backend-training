@@ -1,8 +1,8 @@
 package arg
 
-import (
-	"flag"
-)
+import "flag"
+
+var LogLevel int
 
 var FlagConfig = struct {
 	Levels []bool
@@ -27,4 +27,6 @@ func init() {
 			FlagConfig.MinLvl = i + 1
 		}
 	}
+
+	LogLevel = FlagConfig.MinLvl
 }
