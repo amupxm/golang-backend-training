@@ -13,7 +13,10 @@ type msg struct {
 }
 
 func main() {
-	c, _ := money.ParseCAD("$100.01")
+	c, e := money.ParseCAD("-5")
+	if e != nil {
+		panic(e)
+	}
 	fmt.Println(c)
 	fmt.Printf("money = %#v\n", c)
 	result := &msg{
@@ -28,5 +31,5 @@ func main() {
 	fmt.Println(string(o))
 	result = &msg{}
 	json.Unmarshal(o, result)
-	fmt.Println(result)
+	fmt.Println(result.Balance)
 }

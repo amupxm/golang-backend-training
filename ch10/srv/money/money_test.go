@@ -16,12 +16,16 @@ func TestCents(t *testing.T) {
 		{105, money.CAD{1, 5}},
 		{1050, money.CAD{10, 50}},
 		{-105, money.CAD{-1, -5}},
+		{-1, money.CAD{0, -1}},
+		{-500, money.CAD{-5, 0}},
+
 		{-100000005, money.CAD{-1000000, -05}},
 		{-100000005, money.CAD{-1000000, -05}},
 	}
 	for _, test := range testTable {
 		if got := money.Cents(test.I); got != test.Result {
 			t.Errorf("Cents(%d) = %v; want %v", test.I, got, test.Result)
+			continue
 		}
 	}
 }
@@ -50,6 +54,19 @@ func TestParseCAD(t *testing.T) {
 			money.CAD{
 				0,
 				-90,
+			},
+		}, {
+			"0.02",
+			money.CAD{
+				0,
+				2,
+			},
+		},
+		{
+			"-5",
+			money.CAD{
+				-5,
+				0,
 			},
 		},
 		{
@@ -103,12 +120,13 @@ func TestParseCAD(t *testing.T) {
 		},
 	}
 	for _, test := range testTable {
-		if got, err := money.ParseCAD(test.S); *got != test.Result || err != nil {
-			if err != nil {
-				t.Error(err)
-			} else {
-				t.Errorf("ParseCAD(%q) = %v, nil; want %v, nil", test.S, got, test.Result)
-			}
+		got, err := money.ParseCAD(test.S)
+		if err != nil {
+			t.Error(err)
+		}
+		if *got != test.Result {
+			t.Errorf(test.S, got.AsCent(), test.Result.AsCent())
+			continue
 		}
 	}
 }
@@ -143,6 +161,7 @@ func TestAdd(t *testing.T) {
 	for _, test := range testTable {
 		if got := test.A.Add(test.B); got != test.Result {
 			t.Errorf("Add(%v, %v) = %v; want %v", test.A, test.B, got, test.Result)
+			continue
 		}
 	}
 }
@@ -172,6 +191,7 @@ func TestMultiply(t *testing.T) {
 	for _, test := range testTable {
 		if got := test.A.Mul(test.B); got != test.Result {
 			t.Errorf("Sub(%v, %v) = %v; want %v", test.A, test.B, got, test.Result)
+			continue
 		}
 	}
 }
@@ -201,6 +221,7 @@ func TestSub(t *testing.T) {
 	for _, test := range testTable {
 		if got := test.A.Sub(test.B); got != test.Result {
 			t.Errorf("Sub(%v, %v) = %v; want %v", test.A, test.B, got, test.Result)
+			continue
 		}
 	}
 }

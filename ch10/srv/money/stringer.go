@@ -3,7 +3,7 @@ package money
 import "fmt"
 
 func (c *CAD) GoString() string {
-	return fmt.Sprintf("Cents(%d)", c.AsCent())
+	return fmt.Sprintf("money.Cents(%d)", c.AsCent())
 }
 
 func (c *CAD) String() string {
@@ -11,7 +11,7 @@ func (c *CAD) String() string {
 	if c.Dollar < 0 || c.Cents < 0 {
 		z = -1
 	}
-	r := fmt.Sprintf("%d", c.Dollar)
+	r := fmt.Sprintf("%d", c.Dollar*z)
 	if c.Cents != 0 {
 		r += fmt.Sprintf(".%02d", c.Cents*z)
 	}

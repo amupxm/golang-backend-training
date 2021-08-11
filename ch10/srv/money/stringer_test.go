@@ -26,6 +26,7 @@ func TestStringer(t *testing.T) {
 		)
 		if b.String() != tt.Expected {
 			t.Error("invalid got : " + b.String() + " expected " + tt.Expected)
+			continue
 		}
 	}
 }
@@ -35,8 +36,8 @@ func TestGoStringer(t *testing.T) {
 		S        string
 		Expected string
 	}{
-		{"1.23", "Cents(123)"},
-		{"-CAD$.2", "Cents(-20)"},
+		{"1.23", "money.Cents(123)"},
+		{"-CAD$.2", "money.Cents(-20)"},
 	}
 
 	for _, tt := range testTable {
@@ -49,7 +50,7 @@ func TestGoStringer(t *testing.T) {
 		)
 		if b.String() != tt.Expected {
 			t.Error("invalid got : " + b.String() + " expected " + tt.Expected)
-
+			continue
 		}
 	}
 
