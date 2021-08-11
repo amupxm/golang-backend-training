@@ -1,13 +1,9 @@
 package money
 
-import (
-	"fmt"
-)
+import "encoding/json"
 
-func (c *CAD) MarshalJSON() ([]byte, error) {
-	return []byte(
-		fmt.Sprintf("\"%s\"", c.String()),
-	), nil
+func (c CAD) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c.String())
 }
 
 func (c *CAD) UnmarshalJSON(b []byte) error {
